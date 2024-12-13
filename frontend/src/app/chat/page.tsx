@@ -1,8 +1,10 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect } from 'react'
 
 export default function WorkoutPage() {
+  const { getToken } = useAuth();
   const [time, setTime] = useState(1200)
   const [timerState, setTimerState] = useState<'initial' | 'running' | 'paused'>('initial')
   const [messages, setMessages] = useState<{ text: string, sender: 'user' | 'assistant' }[]>([])
@@ -42,12 +44,33 @@ export default function WorkoutPage() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  const sendMessage = async (message: string) => {
+    try {
+      const token = await getToken();
+      console.log(token);
+      console.log(message);
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        },
+      body: JSON.stringify({ message }),
+    });
+    const data = await response.json();
+    console.log(data);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputMessage.trim()) {
       setMessages([...messages, { text: inputMessage, sender: 'user' }])
-      setInputMessage('')
-      // Here you would typically make an API call to your AI service
+      setInputMessage('');
+      console.log(inputMessage);
+      sendMessage(inputMessage);
     }
   }
 
