@@ -1,18 +1,18 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react'
 
-export default function WorkoutPage() {
+
+export default function WorkoutPage({ params }: { params?: { chatId?: string } }) {
   const { getToken } = useAuth();
   const [time, setTime] = useState(1200)
   const [timerState, setTimerState] = useState<'initial' | 'running' | 'paused'>('initial')
   const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([{text: 'Hey there! How can I help you today?', role: 'ASSISTANT'}])
   const [inputMessage, setInputMessage] = useState('')
-
-  useEffect(() => {
-    createChatSession();
-  }, []);
+  const [chatSessionId, setChatSessionId] = useState('');
+  const router = useRouter();
 
   // Timer logic
   useEffect(() => {
@@ -30,13 +30,13 @@ export default function WorkoutPage() {
   const handleTimerControl = () => {
     switch (timerState) {
       case 'initial':
-        setTimerState('running')
+        setTimerState('running');
         break
       case 'running':
-        setTimerState('paused')
+        setTimerState('paused');
         break
       case 'paused':
-        setTimerState('running')
+        setTimerState('running');
         break
     }
   }
@@ -48,7 +48,7 @@ export default function WorkoutPage() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
  
-  const createChatSession = async () => {
+  const createChatSession = async (inputMessage: string) => {
     try {
       const token = await getToken();
       const response = await fetch('http://localhost:8000/chats', {
@@ -60,6 +60,8 @@ export default function WorkoutPage() {
       });
       const data = await response.json();
       console.log(data);
+      setChatSessionId(data.id);
+      // router.replace(`/chat/${data.id}`);
     } catch (error) {
       console.error('Error creating chat session:', error);
     }
@@ -68,30 +70,39 @@ export default function WorkoutPage() {
   const sendMessage = async (message: string) => {
     try {
       const token = await getToken();
-      console.log(token);
-      console.log(message);
-      const response = await fetch('http://localhost:8000/chats', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        },
-      body: JSON.stringify({ message }),
-    });
-    const data = await response.json();
-    console.log(data);
+    //  console.log(token);
+      console.log("sending message", message);
+    //   const response = await fetch('http://localhost:8000/chats', {
+    //     method: 'POST',
+    //     headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${token}`,
+    //     },
+    //     body: JSON.stringify({ message }),
+    // });
+    // const data = await response.json();
+    const data = {
+      message: "got it",
+      chat_session_id: chatSessionId,
+    }
+    return data.message;
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
+  const isUserFirstMessage = messages.filter(message => message.role === 'USER').length === 0;
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (inputMessage.trim()) {
-      setMessages([...messages, { text: inputMessage, sender: 'user' }])
-      setInputMessage('');
       console.log(inputMessage);
-      sendMessage(inputMessage);
+      setMessages([...messages, { text: inputMessage, role: 'USER' }]);
+      setInputMessage('');
+      if (isUserFirstMessage) {
+        createChatSession(inputMessage);
+      }
+      const data = await sendMessage(inputMessage);
+      setMessages(prev => [...prev, { text: data!, role: 'ASSISTANT' }]);
     }
   }
 
@@ -119,11 +130,11 @@ export default function WorkoutPage() {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.role === 'USER' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    message.sender === 'user'
+                  className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                    message.role === 'USER'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-700 text-gray-100'
                   }`}
