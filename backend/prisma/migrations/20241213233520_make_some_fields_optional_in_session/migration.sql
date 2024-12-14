@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "ChatSession" ALTER COLUMN "topic" DROP NOT NULL,
+ALTER COLUMN "title" DROP NOT NULL,
+ALTER COLUMN "summary" DROP NOT NULL;

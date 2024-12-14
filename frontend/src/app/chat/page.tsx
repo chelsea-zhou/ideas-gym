@@ -7,8 +7,12 @@ export default function WorkoutPage() {
   const { getToken } = useAuth();
   const [time, setTime] = useState(1200)
   const [timerState, setTimerState] = useState<'initial' | 'running' | 'paused'>('initial')
-  const [messages, setMessages] = useState<{ text: string, sender: 'user' | 'assistant' }[]>([])
+  const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([{text: 'Hey there! How can I help you today?', role: 'ASSISTANT'}])
   const [inputMessage, setInputMessage] = useState('')
+
+  useEffect(() => {
+    createChatSession();
+  }, []);
 
   // Timer logic
   useEffect(() => {
@@ -43,13 +47,30 @@ export default function WorkoutPage() {
     const secs = seconds % 60
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
+ 
+  const createChatSession = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch('http://localhost:8000/chats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error('Error creating chat session:', error);
+    }
+  }
 
   const sendMessage = async (message: string) => {
     try {
       const token = await getToken();
       console.log(token);
       console.log(message);
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch('http://localhost:8000/chats', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
