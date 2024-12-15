@@ -2,10 +2,6 @@ import { getAuth } from '@clerk/express';
 import  * as ChatService  from '../services/chatService';
 import { Request, Response } from 'express';
 
-export interface CreateChatRequest extends Request {
-    userId: string;
-}
-
 export async function createChat(req: Request, res: Response) {
     try {
         const { userId } = await getAuth(req);
@@ -14,7 +10,7 @@ export async function createChat(req: Request, res: Response) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        const chat = await ChatService.createChatSession(userId);
+        const chat = await ChatService.createChatSession({userId});
         console.log(chat);
         res.json(chat);
     } catch (error) {
@@ -22,15 +18,22 @@ export async function createChat(req: Request, res: Response) {
     }
 }
 
-// export async function updateChat(req, res) {
-//     try {
-//     const { userId, topic } = req.body;
-//     const chat = await chatService.updateChat(userId, topic);
-//     res.status(201).json(chat);
-//     } catch (error) {
-//     res.status(500).json({ error: error.message });
-//     }
-// }
+export async function updateChat(req: Request, res: Response) {
+    try {
+        const {chatId} = req.params;
+        const { userId } = await getAuth(req);
+        const { message } = req.body;
+        const chat = await ChatService.updateChat({
+            chatId,
+            userId: userId!,
+            message
+        });
+        res.json(chat);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "failed to update chat" });
+    }
+}
 
 // export async function deleteChat(req, res) {
 //     try {

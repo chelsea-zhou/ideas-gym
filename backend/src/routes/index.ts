@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(requireAuth());
 // Chat routes
 router.post('/chats', requireAuth({}), ChatController.createChat);
-// router.put('/chats/:chatId', ChatController.updateChat);
+router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
 // router.get('/chats', ChatController.getChats);
 // router.get('/chats/:chatId', ChatController.getChatById);
 // router.delete('/chats/:chatId', ChatController.deleteChat);

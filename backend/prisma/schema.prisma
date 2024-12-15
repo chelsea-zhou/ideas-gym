@@ -16,6 +16,7 @@ datasource db {
 model ChatSession {
   id String @id @default(uuid())
   userId String
+  threadId String // use threadId from as sessionId? 
   messages Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
