@@ -1,10 +1,11 @@
 import express from 'express';
 import  * as ChatController  from '../controllers/chatController';
+import  * as StripeController  from '../controllers/stripeController';
 import { requireAuth } from '@clerk/express'
 
 const router = express.Router();
 
-router.use(requireAuth());
+//router.use(requireAuth());
 // Chat routes
 router.post('/chats', requireAuth({}), ChatController.createChat);
 router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
@@ -12,6 +13,7 @@ router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
 // router.get('/chats/:chatId', ChatController.getChatById);
 // router.delete('/chats/:chatId', ChatController.deleteChat);
 
-// User routes
+// stripe routes
+router.post('/stripe/createSubscription', StripeController.createSubscription);
 
 export default router;

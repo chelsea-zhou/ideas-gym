@@ -8,11 +8,8 @@ export interface  GetLlmResponse{
     topic: string;
 }
 
-export interface CreateChatRequest {
-  userId: string;
-}
-export interface UpdateChatRequest {
-  chatId: string;
-  message: string;
-  userId: string;
+export interface CreateSubscriptionRequest {
+    email: string;
+    paymentMethodId: string;
+    priceId: string;
 }
