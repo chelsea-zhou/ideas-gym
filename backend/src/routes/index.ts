@@ -5,7 +5,7 @@ import { requireAuth } from '@clerk/express'
 
 const router = express.Router();
 
-//router.use(requireAuth());
+// router.use(requireAuth());
 // Chat routes
 router.post('/chats', requireAuth({}), ChatController.createChat);
 router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
@@ -14,6 +14,7 @@ router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
 // router.delete('/chats/:chatId', ChatController.deleteChat);
 
 // stripe routes
-router.post('/stripe/createSubscription', StripeController.createSubscription);
+router.post('/stripe/create-checkout-session', requireAuth({}), StripeController.createCheckoutSession);
+router.post('/stripe/create-portal-session', requireAuth({}), StripeController.createPortalSession);
 
 export default router;

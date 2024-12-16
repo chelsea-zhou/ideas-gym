@@ -13,9 +13,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id String @id
+  stripeCustomerId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chatSessions ChatSession[]
+}
+
 model ChatSession {
   id String @id @default(uuid())
   userId String
+  user User @relation(fields: [userId], references: [id])
   threadId String // use threadId from as sessionId? 
   messages Message[]
   createdAt DateTime @default(now())

@@ -33,5 +33,4 @@ export async function createSubscription(req: CreateSubscriptionRequest) {
             console.error('Error creating subscription', error);
         }
     }
-    
 }
