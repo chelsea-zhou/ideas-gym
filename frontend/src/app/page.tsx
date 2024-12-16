@@ -17,6 +17,7 @@ export default function Home() {
         }
       });
       const data = await response.json();
+      console.log("data is", data);
       router.push(`/chat/${data.id}`);
     } catch (error) {
       console.error('Error starting workout:', error);

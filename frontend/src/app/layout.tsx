@@ -26,6 +26,22 @@ export default function RootLayout({
                 History
               </Link>
             </div>
+            <div className="flex gap-4">
+              <Link 
+                href="/stripe"
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                Pricing
+              </Link>
+            </div>
+            <div className="flex gap-4">
+              <Link 
+                href="/stripe/billing"
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                BillingInfo
+              </Link>
+            </div>
             <div>
               <SignedOut>
                 <SignInButton mode="modal">
