@@ -4,13 +4,23 @@ import { useAuth } from '@clerk/nextjs';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react'
 
+interface Message {
+  id: string;
+  content: string;
+  role: 'USER' | 'ASSISTANT';
+}
+
+interface Chat {
+  messages: Message[];
+}
+
 export default function WorkoutPage() {
   const params = useParams();
   const chatSessionId = params.chatId as string;
   const { getToken } = useAuth();
   const [time, setTime] = useState(1200)
   const [timerState, setTimerState] = useState<'initial' | 'running' | 'paused'>('initial')
-  const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([{text: 'Hey there! How can I help you today?', role: 'ASSISTANT'}])
+  const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([])
   const [inputMessage, setInputMessage] = useState('');
 
   // Timer logic
@@ -46,6 +56,26 @@ export default function WorkoutPage() {
     const secs = seconds % 60
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
+
+  const fetchChatDetails = async () => {
+    const token = await getToken();
+    const response = await fetch(`http://localhost:8000/chats/${chatSessionId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data: Chat = await response.json();
+    console.log(data);
+    data.messages.forEach((message) => {
+      setMessages((prev) => [...prev, { text: message.content, role: message.role}]);
+    });
+  }
+
+  useEffect(() => {
+    fetchChatDetails();
+  }, []);
 
   const sendMessage = async (message: string) => {
       try {

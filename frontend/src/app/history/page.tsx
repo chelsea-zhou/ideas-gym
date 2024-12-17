@@ -63,6 +63,7 @@ export default function HistoryPage() {
 
         <div className="grid gap-4">
           {chatInfos.map((conversation) => (
+            <Link key={conversation.id} href={`/chat/${conversation.id}`} className="block">
             <div 
               key={conversation.id}
               className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm hover:bg-gray-800/70 
@@ -101,7 +102,8 @@ export default function HistoryPage() {
                   </div>
                 </div>
               </div>
-            </div>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

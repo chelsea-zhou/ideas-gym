@@ -10,7 +10,7 @@ const router = express.Router();
 router.post('/chats', requireAuth({}), ChatController.createChat);
 router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
 router.get('/chats', requireAuth({}), ChatController.getChats);
-// router.get('/chats/:chatId', ChatController.getChatById);
+router.get('/chats/:chatId', requireAuth({}), ChatController.getChatById);
 // router.delete('/chats/:chatId', ChatController.deleteChat);
 
 // stripe routes
