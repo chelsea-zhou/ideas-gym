@@ -1,5 +1,5 @@
 import { openAIClient } from '../clients/llmClient';
-import prisma, { getChatDetailsById } from '../clients/prismaClient';
+import prisma, { getChatDetailsById, getChatsInfo } from '../clients/prismaClient';
 import { Role } from '@prisma/client';
 
 // todo: move to api.interface.ts
@@ -63,6 +63,23 @@ export async function updateChat(req: UpdateChatRequest) {
   const assistantMessage = response.text.value;
   console.log(`got assistant message:`, assistantMessage);
 
+  const createDateTime = new Date(chatSession.createdAt);
+  createDateTime.setMinutes(createDateTime.getMinutes() + 2);
+  if (new Date() > createDateTime && !chatSession.title) {
+    console.log('Conversation is 2 minutes after start');
+    const summary = await openAIClient.summarizeThread(threadId);
+    console.log(`got summary:`, summary);
+    if (summary) {
+      await prisma.chatSession.update({
+        where: { id: chatId },
+        data: { 
+          title: summary.title,
+          topic: summary.topics.join(', ')
+        }
+      });
+    }
+  }
+
   await prisma.message.create({
     data: {
       role: Role.ASSISTANT,
@@ -87,8 +104,14 @@ export async function getChats(req: GetChatsRequest) {
   if (!userId) {
     throw new Error('Missing required fields');
   }
-  const chats = await prisma.chatSession.findMany({ where: { userId } });
-  return chats;
+  const chats = await getChatsInfo(userId);
+  const result = chats.map((chat) => {
+    return {
+      ...chat,
+      messageCount: chat._count.messages
+    }
+  });
+  return result;
 }
 
 export async function getChatById(req: GetChatByIdRequest) {

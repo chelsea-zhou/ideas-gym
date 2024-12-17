@@ -1,6 +1,10 @@
 import OpenAI from 'openai';
 import { TextContentBlock } from 'openai/resources/beta/threads/messages';
 
+interface Summary {
+  topics: string[],
+  title: string
+}
 export class OpenAIClient {
   private openai: OpenAI;
   private assistantId: string;
@@ -18,27 +22,10 @@ export class OpenAIClient {
     return this.threadId;
   }
 
-//   static async initialize(): Promise<OpenAIClient> {
-//     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-//     //const assistant = await this.createAssistant(openai);
-//     const thread = await this.createThread(openai);
-//     return new OpenAIClient('asst_sA3SlyUjJbAF4dwyPBJa4CjT', thread.id);
-//   }
-
-
    async createThread() {
     const thread = await this.openai.beta.threads.create();
     this.threadId = thread.id;
   }
-
-//   static async createAssistant(openai: OpenAI) {
-//     const assistant = await openai.beta.assistants.create({
-//       name: "Chat Assistant",
-//       instructions: "You are a helpful assistant.",
-//       model: "gpt-4-turbo-preview"
-//     });
-//     return assistant;
-//   }
 
   async sendMessage(threadId: string, content: string) {
     const message = await this.openai.beta.threads.messages.create(threadId, {
@@ -61,8 +48,34 @@ export class OpenAIClient {
     const messages = await this.openai.beta.threads.messages.list(threadId, {
         run_id: run.id
     });
-    console.log(`list messages:`, messages.data);
     return messages.data[0].content[0] as TextContentBlock;
+  }
+
+  async summarizeThread(threadId: string): Promise<Summary | null> {
+    const messages = await this.openai.beta.threads.messages.list(threadId);
+    const messagesArray = messages.data.map(msg => ({
+      role: msg.role,
+      content: (msg.content[0] as TextContentBlock).text.value
+    }));
+    console.log(`messagesArray:`, JSON.stringify(messagesArray, null, 2));
+    const summaryResponse = await this.openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "user", 
+          content: "Summarize our conversation with:\n1. A descriptive title (3-5 words)\n2. Three key topics discussed (single words or short phrases)\nFormat as JSON with keys 'title' and 'topics' (array)" 
+        },
+        ...messagesArray
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 150 // Adjust the token limit as needed
+    });
+    if (summaryResponse.choices[0].message.content) {
+      const result =  JSON.parse(summaryResponse.choices[0].message.content);
+      console.log(`result:`, result);
+      return result;
+    }
+    return null;
   }
 }
 

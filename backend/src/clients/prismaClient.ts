@@ -21,7 +21,14 @@ export async function updateUser(userId: string, stripeCustomerId: string) {
 }
 
 export async function getChatsInfo(userId: string) {
-    const chatsInfo = await prisma.chatSession.findMany({ where: { userId } });
+    const chatsInfo = await prisma.chatSession.findMany({ 
+        where: { userId },
+        include: {
+            _count: {
+                select: { messages: true }
+            }
+    }
+    });
     return chatsInfo;
 }
 

@@ -55,7 +55,6 @@ export async function getChats(req: Request, res: Response) {
             return;
         }
         const chatsInfo = await ChatService.getChats({userId});
-        console.log("chatsInfo are", chatsInfo);
         res.json({
             chatInfo: chatsInfo
         });
