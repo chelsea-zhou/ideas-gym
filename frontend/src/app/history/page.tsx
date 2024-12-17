@@ -9,6 +9,7 @@ interface Conversation {
   id: string
   createdAt: string
   title: string
+  topic?: string
   duration: string
   messageCount: number
 }
@@ -22,7 +23,6 @@ const mockConversations: Conversation[] = [
     duration: '20:00',
     messageCount: 12
   },
-  // Add more mock data as needed
 ]
 
 export default function HistoryPage() {
@@ -73,7 +73,7 @@ export default function HistoryPage() {
                 <div>
                   <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-400 
                     transition-colors">
-                    {conversation.title}
+                    Gym Session {conversation.topic && `: ${conversation.topic}`}
                   </h2>
                   <p className="text-gray-400 text-sm">
                     {new Date(conversation.createdAt).toLocaleDateString('en-US', {
@@ -85,21 +85,8 @@ export default function HistoryPage() {
                     })}
                   </p>
                 </div>
-                {/* <div className="flex items-center gap-4 text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{conversation.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                    <span>{conversation.messageCount} messages</span>
-                  </div>
+                {/* <div className="text-gray-400 text-sm">
+                  {conversation.messageCount} messages
                 </div> */}
               </div>
               </div>

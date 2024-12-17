@@ -21,7 +21,6 @@ export default function WorkoutPage() {
   const chatSessionId = params.chatId as string;
   const { getToken } = useAuth();
   const [time, setTime] = useState(1200)
-  const [timerState, setTimerState] = useState<'initial' | 'running' | 'paused'>('initial')
   const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([])
   const [inputMessage, setInputMessage] = useState('');
   const [startTime, setStartTime] = useState(Date.now());
@@ -29,29 +28,14 @@ export default function WorkoutPage() {
   // Timer logic
   useEffect(() => {
     let interval: NodeJS.Timeout
-    if (timerState === 'running' && time > 0) {
+    if (time > 0 && !isGymEnded()) {
+      console.log("update time:", time);
       interval = setInterval(() => {
         setTime((prevTime) => prevTime - 1)
       }, 1000)
-    } else if (time === 0) {
-      setTimerState('initial')
-    }
+    } 
     return () => clearInterval(interval)
-  }, [timerState, time])
-
-  const handleTimerControl = () => {
-    switch (timerState) {
-      case 'initial':
-        setTimerState('running');
-        break
-      case 'running':
-        setTimerState('paused');
-        break
-      case 'paused':
-        setTimerState('running');
-        break
-    }
-  }
+  }, [time])
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
@@ -75,6 +59,10 @@ export default function WorkoutPage() {
       setMessages((prev) => [...prev, { text: message.content, role: message.role}]);
     });
     setStartTime(new Date(data.createdAt).getTime());
+    const timePassed = Math.floor((Date.now() - new Date(data.createdAt).getTime()) / 1000);
+    const timeLeft = Math.max(1200 - timePassed, 0);
+    console.log("time left", timeLeft);
+    setTime(timeLeft);
   }
 
   useEffect(() => {
@@ -83,7 +71,7 @@ export default function WorkoutPage() {
 
   const isGymEnded = () => {
     const currentTime = Date.now();
-    const elapsedTime = currentTime - startTime;
+    const elapsedTime = (currentTime - startTime)/1000;
     return elapsedTime >= 1200;
   }
 
@@ -126,14 +114,6 @@ export default function WorkoutPage() {
         <div className="p-4 border-b border-gray-700">
             <div className="flex items-center justify-center">
               <div className="text-3xl font-bold font-mono">{formatTime(time)}</div>
-              <div className="ml-8">
-                <button
-                  onClick={handleTimerControl}
-                  className="px-8 py-1 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {timerState === 'initial' ? 'Start' : timerState === 'running' ? 'Pause' : 'Resume'}
-                </button>
-              </div>
             </div>
         </div>
       <div className="max-w-6xl mx-auto grid grid-cols-1 gap-6 pt-20">
