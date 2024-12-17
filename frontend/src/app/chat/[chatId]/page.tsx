@@ -10,7 +10,9 @@ interface Message {
   role: 'USER' | 'ASSISTANT';
 }
 
+// temporary type, represents chat object returned from the server
 interface Chat {
+  createdAt: string;
   messages: Message[];
 }
 
@@ -22,6 +24,7 @@ export default function WorkoutPage() {
   const [timerState, setTimerState] = useState<'initial' | 'running' | 'paused'>('initial')
   const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([])
   const [inputMessage, setInputMessage] = useState('');
+  const [startTime, setStartTime] = useState(Date.now());
 
   // Timer logic
   useEffect(() => {
@@ -71,11 +74,18 @@ export default function WorkoutPage() {
     data.messages.forEach((message) => {
       setMessages((prev) => [...prev, { text: message.content, role: message.role}]);
     });
+    setStartTime(new Date(data.createdAt).getTime());
   }
 
   useEffect(() => {
     fetchChatDetails();
   }, []);
+
+  const isGymEnded = () => {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - startTime;
+    return elapsedTime >= 1200;
+  }
 
   const sendMessage = async (message: string) => {
       try {
@@ -156,12 +166,18 @@ export default function WorkoutPage() {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                className="flex-1 bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isGymEnded() ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-white'
+                }`}
                 placeholder="Type your message..."
+                disabled={isGymEnded()}
               />
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                className={`px-6 py-2 rounded-lg transition-colors ${
+                  isGymEnded() ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+                disabled={isGymEnded()}
               >
                 Send
               </button>
