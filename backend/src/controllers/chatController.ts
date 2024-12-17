@@ -1,6 +1,7 @@
 import { getAuth } from '@clerk/express';
 import  * as ChatService  from '../services/chatService';
 import { Request, Response } from 'express';
+import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream';
 
 export async function createChat(req: Request, res: Response) {
     try {
@@ -46,22 +47,41 @@ export async function updateChat(req: Request, res: Response) {
 //     }
 // }
 
-// export async function getChats(req, res) {
-//     try {
-//     const { userId, topic } = req.body;
-//     const chat = await chatService.getChats(userId, topic);
-//     res.status(201).json(chat);
-//     } catch (error) {
-//     res.status(500).json({ error: error.message });
-//     }
-// }
+export async function getChats(req: Request, res: Response) {
+    try {
+        const { userId } = await getAuth(req);
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+        const chatsInfo = await ChatService.getChats({userId});
+        console.log("chatsInfo are", chatsInfo);
+        res.json({
+            chatInfo: chatsInfo
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "failed to get chats" });
+    }
+}
 
-// export async function getChatById(req, res) {
-//     try {
-//     const { userId, topic } = req.body;
-//     const chat = await chatService.getChatById(userId, topic);
-//     res.status(201).json(chat);
-//     } catch (error) {
-//     res.status(500).json({ error: error.message });
-//     }
-// }
+export async function getChatById(req: Request, res: Response) {
+    try {
+        const { chatId} = req.params;
+        const { userId } = await getAuth(req);
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+        if (!chatId) {
+            res.status(400).json({ error: 'Missing chatId' });
+            return;
+        }
+        const chat = await ChatService.getChatById({chatId, userId});
+        console.log("chat is", chat);
+        res.json(chat);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error });
+    }
+}

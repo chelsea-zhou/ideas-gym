@@ -19,4 +19,24 @@ export async function updateUser(userId: string, stripeCustomerId: string) {
         data: { stripeCustomerId: stripeCustomerId }
     });
 }
+
+export async function getChatsInfo(userId: string) {
+    const chatsInfo = await prisma.chatSession.findMany({ where: { userId } });
+    return chatsInfo;
+}
+
+export async function getChatDetailsById(chatId: string, userId: string) {
+    const chat = await prisma.chatSession.findUnique({ 
+        where: { id: chatId , userId: userId},
+        include: {
+            messages: {
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            }
+        }
+     });
+    return chat;
+}
+
 export default prisma

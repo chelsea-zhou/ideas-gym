@@ -1,5 +1,5 @@
 import { openAIClient } from '../clients/llmClient';
-import prisma from '../clients/prismaClient';
+import prisma, { getChatDetailsById } from '../clients/prismaClient';
 import { Role } from '@prisma/client';
 
 // todo: move to api.interface.ts
@@ -10,6 +10,15 @@ export interface UpdateChatRequest {
   chatId: string;
   message: string;
   userId: string;
+}
+
+export interface GetChatsRequest {
+  userId: string;
+}
+
+export interface GetChatByIdRequest {
+  userId: string;
+  chatId: string;
 }
 
 export async function createChatSession(req: CreateChatRequest) {
@@ -71,4 +80,19 @@ export async function updateChat(req: UpdateChatRequest) {
   });
 
   return assistantMessage;
+}
+
+export async function getChats(req: GetChatsRequest) {
+  const { userId } = req;
+  if (!userId) {
+    throw new Error('Missing required fields');
+  }
+  const chats = await prisma.chatSession.findMany({ where: { userId } });
+  return chats;
+}
+
+export async function getChatById(req: GetChatByIdRequest) {
+  const { chatId, userId } = req;
+  const chat = await getChatDetailsById(chatId, userId);
+  return chat;
 }

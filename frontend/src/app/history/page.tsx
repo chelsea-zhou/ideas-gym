@@ -1,10 +1,13 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 interface Conversation {
   id: string
-  date: string
+  createdAt: string
   title: string
   duration: string
   messageCount: number
@@ -14,7 +17,7 @@ interface Conversation {
 const mockConversations: Conversation[] = [
   {
     id: '1',
-    date: '2024-03-20',
+    createdAt: '2024-03-20',
     title: 'Morning Workout Session',
     duration: '20:00',
     messageCount: 12
@@ -23,6 +26,28 @@ const mockConversations: Conversation[] = [
 ]
 
 export default function HistoryPage() {
+  const [chatInfos, setChatInfos] = useState<Conversation[]>([]);
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    const fetchChatInfos = async () => {
+      const token = await getToken();
+      const response = await fetch(`http://localhost:8000/chats`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      const data = await response.json();
+      console.log("data is", data);
+      setChatInfos(data.chatInfo);
+    };
+    fetchChatInfos();
+  }, []);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
       <div className="max-w-6xl mx-auto pt-20">
@@ -37,7 +62,7 @@ export default function HistoryPage() {
         </div>
 
         <div className="grid gap-4">
-          {mockConversations.map((conversation) => (
+          {chatInfos.map((conversation) => (
             <div 
               key={conversation.id}
               className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm hover:bg-gray-800/70 
@@ -50,10 +75,12 @@ export default function HistoryPage() {
                     {conversation.title}
                   </h2>
                   <p className="text-gray-400 text-sm">
-                    {new Date(conversation.date).toLocaleDateString('en-US', {
+                    {new Date(conversation.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric'
                     })}
                   </p>
                 </div>
