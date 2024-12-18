@@ -1,10 +1,11 @@
+import { ENDPOINT } from "@/app/constant";
 import { Logo } from "./Logo";
 import { useAuth } from "@clerk/nextjs";
 export const ProductDisplay = () => {
     const { getToken } = useAuth();
     const createCheckoutSession = async () => {
         const token = await getToken();
-        const response = await fetch(`http://localhost:8000/stripe/create-checkout-session`, {
+        const response = await fetch(`${ENDPOINT.PROD}/stripe/create-checkout-session`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

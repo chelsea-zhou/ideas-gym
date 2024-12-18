@@ -1,5 +1,6 @@
 'use client'
 
+import { ENDPOINT } from '@/app/constant';
 import { useAuth } from '@clerk/nextjs';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react'
@@ -46,7 +47,7 @@ export default function WorkoutPage() {
 
   const fetchChatDetails = async () => {
     const token = await getToken();
-    const response = await fetch(`http://localhost:8000/chats/${chatSessionId}`, {
+    const response = await fetch(`${ENDPOINT.PROD}/chats/${chatSessionId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ export default function WorkoutPage() {
       try {
         const token = await getToken();
         console.log("sending message", message);
-        const response = await fetch(`http://localhost:8000/chats/${chatSessionId}`, {
+        const response = await fetch(`${ENDPOINT.PROD}/chats/${chatSessionId}`, {
           method: 'PUT',
           headers: {
           'Content-Type': 'application/json',

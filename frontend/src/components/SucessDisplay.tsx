@@ -1,3 +1,4 @@
+import { ENDPOINT } from "@/app/constant";
 import { Logo } from "./Logo";
 import { useAuth } from "@clerk/nextjs";
 
@@ -7,7 +8,7 @@ export const SuccessDisplay = ({sessionId}: {sessionId: string}) => {
 
         const token = await getToken();
         console.log('sessionId in api call:', sessionId);
-        const response = await fetch(`http://localhost:8000/stripe/create-portal-session`, {
+        const response = await fetch(`${ENDPOINT.PROD}/stripe/create-portal-session`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

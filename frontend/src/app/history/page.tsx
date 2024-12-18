@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/nextjs'
 import { auth } from '@clerk/nextjs/server'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { ENDPOINT } from '../constant'
 
 interface Conversation {
   id: string
@@ -32,7 +33,7 @@ export default function HistoryPage() {
   useEffect(() => {
     const fetchChatInfos = async () => {
       const token = await getToken();
-      const response = await fetch(`http://localhost:8000/chats`,
+      const response = await fetch(`${ENDPOINT.PROD}/chats`,
         {
           method: 'GET',
           headers: {

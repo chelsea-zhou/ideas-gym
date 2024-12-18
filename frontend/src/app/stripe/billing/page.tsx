@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { ENDPOINT } from '@/app/constant';
 
 export default function BillingPage() {
   const router = useRouter();
@@ -12,14 +13,14 @@ export default function BillingPage() {
     const createPortalSession = async () => {
       try {
         const token = await getToken();
-        const response = await fetch('http://localhost:8000/stripe/create-portal-session', {
+        const response = await fetch(`${ENDPOINT.PROD}/stripe/create-portal-session`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
           // todo: fetch customerId from backend
-          body: JSON.stringify({ customerId: 'cus_RPXOVbU6l2w37i' }), // Replace with actual customer ID
+          body: JSON.stringify({ customerId: 'cus_RPXOVbU6l2w37i' }), // todo: Replace with actual customer ID
         });
 
         if (!response.ok) {

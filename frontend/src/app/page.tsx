@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { ENDPOINT } from './constant';
 
 export default function Home() {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function Home() {
   const handleStartWorkout = async () => {
     try {
       const token = await getToken();
-      const response = await fetch('http://localhost:8000/chats', {
+      const response = await fetch(`${ENDPOINT.PROD}/chats`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
