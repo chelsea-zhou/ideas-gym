@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import './page.css';
 import { ProductDisplay } from '@/components/ProductDisplay';
-import { Logo } from '@/components/Logo';
 import { SuccessDisplay } from '@/components/SucessDisplay';
 
 const Message = ({ message }: { message: string }) => (
@@ -13,9 +12,9 @@ const Message = ({ message }: { message: string }) => (
 );
 
 export default function Checkout() {
-  let [message, setMessage] = useState('');
-  let [success, setSuccess] = useState(false);
-  let [sessionId, setSessionId] = useState('');
+  const [message, setMessage] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [sessionId, setSessionId] = useState('');
 
   useEffect(() => {
     // Check to see if this is a redirect back from Checkout
