@@ -58,8 +58,13 @@ export async function updateChat(req: UpdateChatRequest) {
     throw new Error('Unauthorized');
   }
   const threadId = chatSession.threadId;
-  // call openai api to get response
-  const response = await openAIClient.sendMessage(threadId, message);
+ 
+  const elapsedTime = Math.floor((new Date().getTime() - chatSession.createdAt.getTime()) / 60000);
+  const elapsedTimeString = `[${elapsedTime.toString().padStart(2, '0')}:00]`;
+  const messageWithElapsedTime = `${elapsedTimeString} ${message} `;
+  console.log(`messageWithElapsedTime:`, messageWithElapsedTime);
+  
+  const response = await openAIClient.sendMessage(threadId, messageWithElapsedTime);
   const assistantMessage = response.text.value;
   console.log(`got assistant message:`, assistantMessage);
 

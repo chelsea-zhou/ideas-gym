@@ -58,12 +58,18 @@ export class OpenAIClient {
       content: (msg.content[0] as TextContentBlock).text.value
     }));
     console.log(`messagesArray:`, JSON.stringify(messagesArray, null, 2));
+
+    const prompt = `Summarize our conversation with:
+      1. A descriptive title (3-5 words)
+      2. Three key topics discussed (single words or short phrases)
+      Format as JSON with keys 'title' and 'topics' (array)`;
+
     const summaryResponse = await this.openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { 
           role: "user", 
-          content: "Summarize our conversation with:\n1. A descriptive title (3-5 words)\n2. Three key topics discussed (single words or short phrases)\nFormat as JSON with keys 'title' and 'topics' (array)" 
+          content: prompt
         },
         ...messagesArray
       ],
@@ -79,5 +85,4 @@ export class OpenAIClient {
   }
 }
 
-// Usage:
 export const openAIClient = new OpenAIClient();
