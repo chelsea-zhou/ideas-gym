@@ -3,11 +3,11 @@ import {
   SignInButton,
   SignUpButton,
   SignedIn,
-  SignedOut,
-  UserButton
+  SignedOut
 } from '@clerk/nextjs'
 import './globals.css'
 import Link from 'next/link'
+import CustomUserButton from '@/components/ProfileButton'
 
 export default function RootLayout({
   children,
@@ -19,7 +19,6 @@ export default function RootLayout({
       <html lang="en">
         <body>
           <nav className="fixed top-0 w-full p-4 flex justify-between items-center  backdrop-blur-sm border-b">
-            {
             <div className="flex gap-4">
               <Link 
                 href="/history"
@@ -28,24 +27,8 @@ export default function RootLayout({
                 Previous Workouts
               </Link>
             </div>
-            /*
-            <div className="flex gap-4">
-              <Link 
-                href="/stripe"
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                Pricing
-              </Link>
-            </div>
-            <div className="flex gap-4">
-              <Link 
-                href="/stripe/billing"
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                BillingInfo
-              </Link>
-            </div> */}
-            <div className="ml-auto"> {/* Added ml-auto to push content to the right */}
+            
+            <div className="ml-auto">
               <SignedOut>
                 <SignInButton mode="modal">
                   <button className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors">
@@ -54,15 +37,7 @@ export default function RootLayout({
                 </SignInButton>
               </SignedOut>
               <SignedIn>
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      userButtonAvatarBox: "w-10 h-10 rounded-full",
-                      userButtonTrigger: "hover:opacity-80 transition-opacity"
-                    }
-                  }}
-                  afterSignOutUrl="/"
-                />
+                <CustomUserButton />
               </SignedIn>
             </div>
           </nav>
