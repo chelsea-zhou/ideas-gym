@@ -2,6 +2,7 @@ import { getAuth } from '@clerk/express';
 import  * as ChatService  from '../services/chatService';
 import { Request, Response } from 'express';
 import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream';
+import { createUser, getUser } from '../clients/prismaClient';
 
 export async function createChat(req: Request, res: Response) {
     try {
@@ -11,6 +12,10 @@ export async function createChat(req: Request, res: Response) {
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
+        }
+        const user = await getUser(userId);
+        if (!user) {
+            await createUser(userId);
         }
         const chat = await ChatService.createChatSession({userId});
         console.log("new chat is", chat);
