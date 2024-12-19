@@ -19,6 +19,20 @@ interface Chat {
   title: string;
 }
 
+export const useAutoResize = (value: string) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [value]);
+
+  return textareaRef;
+};
+
 export default function WorkoutPage() {
   const params = useParams();
   const chatSessionId = params.chatId as string;
@@ -29,6 +43,8 @@ export default function WorkoutPage() {
   const [startTime, setStartTime] = useState(Date.now());
   const [isSummaryGenerated, setIsSummaryGenerated] = useState(false);
   const [summary, setSummary] = useState('');
+  const textareaRef = useAutoResize(inputMessage);
+
 
   // Timer logic
   useEffect(() => {
@@ -154,6 +170,12 @@ export default function WorkoutPage() {
     scrollToBottom();
   }, [messages]); 
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
         <div className="p-4  border-gray-700  mt-16">
@@ -186,11 +208,14 @@ export default function WorkoutPage() {
 
           <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
             <div className="flex gap-2">
-              <input
-                type="text"
+              <textarea
+                ref={textareaRef}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                className={`flex-1 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                onKeyDown={handleKeyDown}
+                rows={1}
+                className={`flex-1 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
+                ${
                   isGymEnded() ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-white'
                 }`}
                 placeholder="Type your message..."
