@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Role } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -23,12 +23,14 @@ export async function updateUser(userId: string, stripeCustomerId: string) {
 export async function getChatsInfo(userId: string) {
     const chatsInfo = await prisma.chatSession.findMany({ 
         where: { userId },
+        orderBy: {
+            createdAt: 'desc'
+        },
         include: {
             _count: {
                 select: { messages: true }
             }
-    }
-    });
+    }});
     return chatsInfo;
 }
 
@@ -46,4 +48,14 @@ export async function getChatDetailsById(chatId: string, userId: string) {
     return chat;
 }
 
+ export async function createMessage(message: string, chatId: string, role: Role) {
+    const createdMessage = await prisma.message.create({
+        data: {
+        role: role,
+        content: message,
+        chatSessionId: chatId
+        }
+    });
+    return createdMessage;
+ }
 export default prisma

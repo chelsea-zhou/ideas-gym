@@ -84,3 +84,23 @@ export async function getChatById(req: Request, res: Response) {
         res.status(500).json({ error: error });
     }
 }
+
+export async function generateSummary(req: Request, res: Response) {
+    try {   
+        const { chatId } = req.params;
+        const { userId } = await getAuth(req);
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+        if (!chatId) {
+            res.status(400).json({ error: 'Missing chatId' });
+            return;
+        }
+        const summary = await ChatService.generateSummary({ chatId, userId });
+        res.json(summary);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Failed to generate summary' });
+    }
+}

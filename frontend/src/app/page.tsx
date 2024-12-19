@@ -1,3 +1,4 @@
+'use client'
 import {
     ClerkProvider,
     SignInButton,
@@ -6,7 +7,15 @@ import {
     SignUpButton,
     UserButton
   } from '@clerk/nextjs'
+import { useAuth } from '@clerk/nextjs';
+import { redirect } from 'next/navigation';
+
 export default function Home() {
+  const { userId } = useAuth();
+  
+  if (userId) {
+    redirect('/chat');
+  }
     return (
       <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
         <div className="h-screen flex flex-col items-center justify-center px-4">

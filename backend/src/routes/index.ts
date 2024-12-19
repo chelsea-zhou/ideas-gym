@@ -11,6 +11,7 @@ router.post('/chats', requireAuth({}), ChatController.createChat);
 router.put('/chats/:chatId', requireAuth({}),ChatController.updateChat);
 router.get('/chats', requireAuth({}), ChatController.getChats);
 router.get('/chats/:chatId', requireAuth({}), ChatController.getChatById);
+router.put('/chats/:chatId/summary', requireAuth({}), ChatController.generateSummary);
 // router.delete('/chats/:chatId', ChatController.deleteChat);
 
 // stripe routes

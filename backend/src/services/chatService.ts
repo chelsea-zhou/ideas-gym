@@ -1,5 +1,5 @@
 import { openAIClient } from '../clients/llmClient';
-import prisma, { getChatDetailsById, getChatsInfo } from '../clients/prismaClient';
+import prisma, { createMessage, getChatDetailsById, getChatsInfo } from '../clients/prismaClient';
 import { Role } from '@prisma/client';
 
 // todo: move to api.interface.ts
@@ -44,6 +44,12 @@ export async function createChatSession(req: CreateChatRequest) {
   return chat;
 }
 
+const getElapsedTime = (createdAt: Date) => {
+  const elapsedTime = Math.floor((new Date().getTime() - createdAt.getTime()) / 60000);
+  const elapsedTimeString = `[${elapsedTime.toString().padStart(2, '0')}:00]`;
+  return elapsedTimeString;
+}
+
 export async function updateChat(req: UpdateChatRequest) {
   const { chatId, userId, message } = req;
   if (!chatId || !userId || !message) {
@@ -59,48 +65,18 @@ export async function updateChat(req: UpdateChatRequest) {
   }
   const threadId = chatSession.threadId;
  
-  const elapsedTime = Math.floor((new Date().getTime() - chatSession.createdAt.getTime()) / 60000);
-  const elapsedTimeString = `[${elapsedTime.toString().padStart(2, '0')}:00]`;
+  // insert user message into db
+  await createMessage(message, chatId, Role.USER);
+  const elapsedTimeString = getElapsedTime(chatSession.createdAt);
   const messageWithElapsedTime = `${elapsedTimeString} ${message} `;
-  console.log(`messageWithElapsedTime:`, messageWithElapsedTime);
   
+  // get assistant response
   const response = await openAIClient.sendMessage(threadId, messageWithElapsedTime);
   const assistantMessage = response.text.value;
   console.log(`got assistant message:`, assistantMessage);
 
-  const createDateTime = new Date(chatSession.createdAt);
-  createDateTime.setMinutes(createDateTime.getMinutes() + 2);
-  if (new Date() > createDateTime && !chatSession.title) {
-    console.log('Conversation is 2 minutes after start');
-    const summary = await openAIClient.summarizeThread(threadId);
-    console.log(`got summary:`, summary);
-    if (summary) {
-      await prisma.chatSession.update({
-        where: { id: chatId },
-        data: { 
-          title: summary.title,
-          topic: summary.topics.join(', ')
-        }
-      });
-    }
-  }
-
-  await prisma.message.create({
-    data: {
-      role: Role.ASSISTANT,
-      content: assistantMessage,
-      chatSessionId: chatId
-    }
-  });
-
-  await prisma.message.create({
-    data: {
-      role: Role.USER,
-      content: message,
-      chatSessionId: chatId
-    }
-  });
-
+  // insert assistant message into db
+  await createMessage(assistantMessage, chatId, Role.ASSISTANT);
   return assistantMessage;
 }
 
@@ -123,4 +99,25 @@ export async function getChatById(req: GetChatByIdRequest) {
   const { chatId, userId } = req;
   const chat = await getChatDetailsById(chatId, userId);
   return chat;
+}
+
+export async function generateSummary(req: GetChatByIdRequest) {
+  const { chatId } = req;
+  const chat = await prisma.chatSession.findUnique({ where: { id: chatId } });
+  if (!chat) {
+    throw new Error('Chat session not found');
+  }
+  if (!chat.summary) {
+    const summary = await openAIClient.summarizeThread(chat.threadId);
+    if (summary) {
+      await prisma.chatSession.update({
+        where: { id: chatId },
+        data: { 
+          title: summary.title,
+          topic: summary.topics.join(', ')
+        }
+      });
+    }
+  }
+  return chat?.summary;
 }

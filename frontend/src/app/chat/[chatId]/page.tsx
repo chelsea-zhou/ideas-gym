@@ -15,6 +15,8 @@ interface Message {
 interface Chat {
   createdAt: string;
   messages: Message[];
+  topic: string;
+  title: string;
 }
 
 export default function WorkoutPage() {
@@ -25,18 +27,42 @@ export default function WorkoutPage() {
   const [messages, setMessages] = useState<{ text: string, role: 'USER' | 'ASSISTANT' }[]>([])
   const [inputMessage, setInputMessage] = useState('');
   const [startTime, setStartTime] = useState(Date.now());
+  const [isSummaryGenerated, setIsSummaryGenerated] = useState(false);
+  const [summary, setSummary] = useState('');
 
   // Timer logic
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (time > 0 && !isGymEnded()) {
-      console.log("update time:", time);
       interval = setInterval(() => {
         setTime((prevTime) => prevTime - 1)
       }, 1000)
     } 
     return () => clearInterval(interval)
-  }, [time])
+  }, [time]);
+
+
+  useEffect(() => {
+    if (isGymEndedInMinutes(2) && !isSummaryGenerated) {
+      console.log("generating summary");
+      generateSummary();
+      setIsSummaryGenerated(true);
+    }
+  }, [time]);
+
+  const generateSummary = async () => {
+    const token = await getToken();
+    const response = await fetch(`${ENDPOINT.PROD}/chats/${chatSessionId}/summary`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    console.log(data);
+    //setSummary(data.summary);
+  }
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
@@ -59,6 +85,10 @@ export default function WorkoutPage() {
     data.messages.forEach((message) => {
       setMessages((prev) => [...prev, { text: message.content, role: message.role}]);
     });
+    
+    if (data.title || data.topic) {
+      setIsSummaryGenerated(true);
+    }
     setStartTime(new Date(data.createdAt).getTime());
     const timePassed = Math.floor((Date.now() - new Date(data.createdAt).getTime()) / 1000);
     const timeLeft = Math.max(1200 - timePassed, 0);
@@ -76,10 +106,14 @@ export default function WorkoutPage() {
     return elapsedTime >= 1200;
   }
 
+  const isGymEndedInMinutes = (minutes: number) => {
+    const currentTime = Date.now();
+    const timeLeft = 1200 - (currentTime - startTime)/1000;
+    return timeLeft <= minutes * 60;
+  }
   const sendMessage = async (message: string) => {
       try {
         const token = await getToken();
-        console.log("sending message", message);
         const response = await fetch(`${ENDPOINT.PROD}/chats/${chatSessionId}`, {
           method: 'PUT',
           headers: {
@@ -89,7 +123,6 @@ export default function WorkoutPage() {
           body: JSON.stringify({ message }),
         });
         const data = await response.json();
-        console.log(data);
         return data;
       } catch (error) {
         console.error('Error sending message:', error);

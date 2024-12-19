@@ -19,14 +19,16 @@ export default function RootLayout({
       <html lang="en">
         <body>
           <nav className="fixed top-0 w-full p-4 flex justify-between items-center  backdrop-blur-sm border-b">
-            {/* <div className="flex gap-4">
+            {
+            <div className="flex gap-4">
               <Link 
                 href="/history"
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-4 hover:text-purple-400 transition-colors text-purple-200 text-lg"
               >
-                History
+                Previous Workouts
               </Link>
             </div>
+            /*
             <div className="flex gap-4">
               <Link 
                 href="/stripe"

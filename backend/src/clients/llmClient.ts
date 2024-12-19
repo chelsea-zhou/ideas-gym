@@ -5,6 +5,12 @@ interface Summary {
   topics: string[],
   title: string
 }
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export class OpenAIClient {
   private openai: OpenAI;
   private assistantId: string;
@@ -49,6 +55,32 @@ export class OpenAIClient {
         run_id: run.id
     });
     return messages.data[0].content[0] as TextContentBlock;
+  }
+
+  async getTopics(messages: Message[]): Promise<string[] | null> {
+    const prompt = `Summarize our conversation with:
+      1. A descriptive title (3-5 words)
+      2. Three key topics discussed (single words or short phrases)
+      Format as JSON with keys 'title' and 'topics' (array)`;
+
+    const summaryResponse = await this.openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "user", 
+          content: prompt
+        },
+        ...messages
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 150 // Adjust the token limit as needed
+    });
+    if (summaryResponse.choices[0].message.content) {
+      const result =  JSON.parse(summaryResponse.choices[0].message.content);
+      console.log(`result:`, result);
+      return result;
+    }
+    return null;
   }
 
   async summarizeThread(threadId: string): Promise<Summary | null> {
