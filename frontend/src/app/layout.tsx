@@ -20,12 +20,14 @@ export default function RootLayout({
         <body>
           <nav className="fixed top-0 w-full p-4 flex justify-between items-center  backdrop-blur-sm border-b">
             <div className="flex gap-4">
+            <SignedIn>
               <Link 
                 href="/history"
                 className="px-4 hover:text-purple-400 transition-colors text-purple-200 text-lg"
               >
                 Previous Workouts
               </Link>
+              </SignedIn>
             </div>
             
             <div className="ml-auto">
