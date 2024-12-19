@@ -53,7 +53,7 @@ export default function HistoryPage() {
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
       <div className="max-w-6xl mx-auto pt-20">
         <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Workout History</h1>
+          <h1 className="text-3xl font-bold">Previous workouts</h1>
           <Link 
             href="/chat"
             className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"

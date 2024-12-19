@@ -1,6 +1,7 @@
 import {
   ClerkProvider,
   SignInButton,
+  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton
@@ -17,8 +18,8 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <nav className="fixed top-0 w-full p-4 flex justify-between items-center bg-white/80 backdrop-blur-sm border-b">
-            <div className="flex gap-4">
+          <nav className="fixed top-0 w-full p-4 flex justify-between items-center  backdrop-blur-sm border-b">
+            {/* <div className="flex gap-4">
               <Link 
                 href="/history"
                 className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
@@ -41,11 +42,11 @@ export default function RootLayout({
               >
                 BillingInfo
               </Link>
-            </div>
-            <div>
+            </div> */}
+            <div className="ml-auto"> {/* Added ml-auto to push content to the right */}
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
+                  <button className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors">
                     Sign In
                   </button>
                 </SignInButton>
@@ -63,7 +64,8 @@ export default function RootLayout({
               </SignedIn>
             </div>
           </nav>
-          <div className="pt-16">
+
+          <div className="">
             {children}
           </div>
         </body>

@@ -3,7 +3,7 @@
 import { ENDPOINT } from '@/app/constant';
 import { useAuth } from '@clerk/nextjs';
 import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Message {
   id: string;
@@ -107,21 +107,29 @@ export default function WorkoutPage() {
         const data = await sendMessage(inputMessage);
         setMessages((prev) => [...prev, { text: data!, role: 'ASSISTANT' }]);
       }
-    }
+    } 
   }
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Add scroll to bottom function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Add useEffect to scroll on messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); 
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4  border-gray-700  mt-16">
             <div className="flex items-center justify-center">
               <div className="text-3xl font-bold font-mono">{formatTime(time)}</div>
             </div>
         </div>
-      <div className="max-w-6xl mx-auto grid grid-cols-1 gap-6 pt-20">
-        {/* Chat Section with Timer at Top */}
-        <div className="bg-gray-800/50 rounded-xl backdrop-blur-sm flex flex-col h-[600px]">
-          {/* Timer Section */}
-
+      <div className="max-w-6xl mx-auto grid grid-cols-1 gap-6 pt-4">
+        <div className="bg-gray-800/50 rounded-xl backdrop-blur-sm flex flex-col h-[66vh]">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
               <div
@@ -129,7 +137,7 @@ export default function WorkoutPage() {
                 className={`flex ${message.role === 'USER' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                  className={`max-w-[70%] rounded-lg px-4 py-2 text-lg ${
                     message.role === 'USER'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-700 text-gray-100'
@@ -139,6 +147,8 @@ export default function WorkoutPage() {
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
+
           </div>
 
           <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700">
