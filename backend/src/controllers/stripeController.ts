@@ -1,6 +1,3 @@
-
-import * as StripeService from '../services/stripeService';
-import { CreateSubscriptionRequest } from '../services/api.interface';
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { getAuth } from '@clerk/express';
@@ -40,6 +37,7 @@ export async function createCheckoutSession(req: Request, res: Response) {
         success_url: `${process.env.YOUR_DOMAIN}/stripe?success=true&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.YOUR_DOMAIN}/stripe?canceled=true`,
         automatic_tax: {enabled: true},
+        client_reference_id: userId,
     });
     console.log('created session:', session.id);
     res.json({ url: session.url });
@@ -55,4 +53,36 @@ export async function createPortalSession(req: Request, res: Response) {
   console.log('created portal session:', portalSession);
 
   res.json({ url: portalSession.url });
+}
+
+export async function receiveWebhookEvent(req: Request, res: Response) {
+  const event = req.body;
+  console.log('event:', event);
+
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const session = event.data.object;
+      console.log('session:', session);
+      try {
+        const userId = session.client_reference_id;
+        const customerId = session.customer;
+        await updateUser(userId, customerId);
+        console.log(`Updated user ${userId} with Stripe customer ID ${customerId}`);
+      } catch (error) {
+        console.error('Error updating user with Stripe customer ID:', error);
+      }
+      break;
+    case 'customer.created':
+      const customer = event.data.object;
+      console.log('customer:', customer);
+      break;
+    case 'customer.subscription.created':
+      const subscription = event.data.object;
+      console.log('subscription:', subscription);
+      break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  res.json({received: true});
 }

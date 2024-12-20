@@ -1,6 +1,6 @@
 import { openAIClient } from '../clients/llmClient';
 import prisma, { createMessage, getChatDetailsById, getChatsInfo } from '../clients/prismaClient';
-import { Role } from '@prisma/client';
+import {  Role } from '@prisma/client';
 
 // todo: move to api.interface.ts
 export interface CreateChatRequest {
@@ -67,6 +67,7 @@ export async function updateChat(req: UpdateChatRequest) {
  
   // insert user message into db
   await createMessage(message, chatId, Role.USER);
+  console.log(`inserted user message into db:`, message);
   const elapsedTimeString = getElapsedTime(chatSession.createdAt);
   const messageWithElapsedTime = `${elapsedTimeString} ${message} `;
   
@@ -77,6 +78,7 @@ export async function updateChat(req: UpdateChatRequest) {
 
   // insert assistant message into db
   await createMessage(assistantMessage, chatId, Role.ASSISTANT);
+  console.log(`inserted assistant message into db:`, assistantMessage);
   return assistantMessage;
 }
 
@@ -120,4 +122,13 @@ export async function generateSummary(req: GetChatByIdRequest) {
     }
   }
   return chat?.summary;
+}
+
+export async function deleteChat(req: GetChatByIdRequest) {
+  const { chatId, userId } = req;
+  await prisma.message.deleteMany({
+    where: { chatSessionId: chatId }
+  });
+  const chat = await prisma.chatSession.delete({ where: { id: chatId, userId } });
+  return chat;
 }

@@ -29,6 +29,15 @@ export default function RootLayout({
               </Link>
               </SignedIn>
             </div>
+
+            <div className="flex gap-4">
+              <Link 
+                href="/stripe"
+                className="px-4 hover:text-purple-400 transition-colors text-purple-200 text-lg"
+              >
+                Pricing
+              </Link>
+            </div>
             
             <div className="ml-auto">
               <SignedOut>

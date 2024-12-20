@@ -2,13 +2,9 @@ import Stripe from 'stripe';
 import { CreateSubscriptionRequest } from './api.interface';
 import { stripeClient } from '../clients/stripeClient';
 
-const priceId = 'price_1QWRK6AsXc0oXQzEi2xGAE2q';
-const testPriceId = 'price_1QWRpkAsXc0oXQzE6HWFpUzv';
-
 export async function createSubscription(req: CreateSubscriptionRequest) {
     try{
         const { email, paymentMethodId, priceId } = req;
-        //const testPaymentMethodId = await createTestPaymentMethod();
     
         const existingCustomer = await stripeClient.findCustomerByEmail(email);
         let customer;

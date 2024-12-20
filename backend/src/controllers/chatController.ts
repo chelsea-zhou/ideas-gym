@@ -42,15 +42,16 @@ export async function updateChat(req: Request, res: Response) {
     }
 }
 
-// export async function deleteChat(req, res) {
-//     try {
-//     const { userId, topic } = req.body;
-//     const chat = await chatService.deleteChat(userId, topic);
-//     res.status(201).json(chat);
-//     } catch (error) {
-//     res.status(500).json({ error: error.message });
-//     }
-// }
+export async function deleteChat(req: Request, res: Response) {
+    try {
+        const {chatId} = req.params;
+        const { userId } = await getAuth(req);
+        const chat = await ChatService.deleteChat({chatId: chatId!, userId: userId!});
+        res.json(chat);
+    } catch (error) {
+        res.json({ error: "failed to delete chat" });
+    }
+}
 
 export async function getChats(req: Request, res: Response) {
     try {

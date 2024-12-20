@@ -15,17 +15,6 @@ interface Conversation {
   messageCount: number
 }
 
-// This would eventually come from your database
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    createdAt: '2024-03-20',
-    title: 'Morning Workout Session',
-    duration: '20:00',
-    messageCount: 12
-  },
-]
-
 export default function HistoryPage() {
   const [chatInfos, setChatInfos] = useState<Conversation[]>([]);
   const { getToken } = useAuth();
@@ -49,6 +38,23 @@ export default function HistoryPage() {
     fetchChatInfos();
   }, []);
 
+  const deleteChat = async (chatId: string, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    if (!confirm('Are you sure you want to delete this chat?')) return;
+
+    const token = await getToken();
+    const response = await fetch(`${ENDPOINT.PROD}/chats/${chatId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      setChatInfos(chatInfos.filter(chat => chat.id !== chatId));
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
       <div className="max-w-6xl mx-auto pt-20">
@@ -56,7 +62,7 @@ export default function HistoryPage() {
           <h1 className="text-3xl font-bold">Previous workouts</h1>
           <Link 
             href="/chat"
-            className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 font-bold bg-purple-300 rounded-lg hover:bg-purple-700 transition-colors text-black"
           >
             New Workout
           </Link>
@@ -86,6 +92,11 @@ export default function HistoryPage() {
                     })}
                   </p>
                 </div>
+                <button 
+                  className="text-gray-400 hover:text-red-300 transition-colors text-2xl"
+                  onClick={(e) => deleteChat(conversation.id, e)}
+                  >x
+                  </button>
                 {/* <div className="text-gray-400 text-sm">
                   {conversation.messageCount} messages
                 </div> */}
