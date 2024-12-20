@@ -19,7 +19,7 @@ interface Chat {
   title: string;
 }
 
-export const useAutoResize = (value: string) => {
+const useAutoResize = (value: string) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
