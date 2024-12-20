@@ -20,7 +20,7 @@ export default function BillingPage() {
             'Authorization': `Bearer ${token}`
           },
           // todo: fetch customerId from backend
-          body: JSON.stringify({ customerId: 'cus_RPXOVbU6l2w37i' }), // todo: Replace with actual customer ID
+          body: JSON.stringify({ customerId: 'cus_RR4ZIsMweQnNR6' }), // todo: Replace with actual customer ID
         });
 
         if (!response.ok) {
@@ -28,10 +28,10 @@ export default function BillingPage() {
         }
 
         const data = await response.json();
-        window.location.href = data.url; // Redirect to Stripe portal
+        window.location.href = data.url;
       } catch (error) {
         console.error('Error:', error);
-        router.push('/'); // Redirect to home page or error page on failure
+        router.push('/');
       }
     };
 
