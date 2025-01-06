@@ -62,7 +62,6 @@ export async function receiveWebhookEvent(req: Request, res: Response) {
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object;
-      console.log('session:', session);
       try {
         const userId = session.client_reference_id;
         const customerId = session.customer;
@@ -74,11 +73,9 @@ export async function receiveWebhookEvent(req: Request, res: Response) {
       break;
     case 'customer.created':
       const customer = event.data.object;
-      console.log('customer:', customer);
       break;
     case 'customer.subscription.created':
       const subscription = event.data.object;
-      console.log('subscription:', subscription);
       break;
     default:
       console.log(`Unhandled event type ${event.type}`);

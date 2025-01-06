@@ -1,12 +1,4 @@
 'use client'
-import {
-    ClerkProvider,
-    SignInButton,
-    SignedIn,
-    SignedOut,
-    SignUpButton,
-    UserButton
-  } from '@clerk/nextjs'
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 
